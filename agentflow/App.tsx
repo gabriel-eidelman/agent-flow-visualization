@@ -8,12 +8,17 @@ import {
   StatusBar,
 } from 'react-native';
 import AgentChat from './AgentChat';
+import WebsocketChat from './WebsocketChat';
 
 export default function App() {
   const [showResult, setShowResult] = useState(false);
+  const [showWebsocket, setShowWebSocket] = useState(false);
 
   if (showResult) {
     return <AgentChat />;
+  }
+  if (showWebsocket) {
+    return <WebsocketChat />;
   }
 
   return (
@@ -28,6 +33,9 @@ export default function App() {
 
         <TouchableOpacity style={styles.button} onPress={() => setShowResult(true)}>
           <Text style={styles.buttonText}>🚀 Launch Curriculum Planning Demo</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={() => setShowWebSocket(true)}>
+          <Text style={styles.buttonText}>🚀 Launch Websocket Chat Demo</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
