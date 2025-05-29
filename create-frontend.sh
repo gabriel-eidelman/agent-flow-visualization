@@ -2,7 +2,7 @@
 
 set -e
 
-PROJECT_NAME="myapp"
+PROJECT_NAME="agentflow"
 
 echo "Creating new React Native app with TypeScript..."
 # avoids issues with the latest version of react-native-cli
