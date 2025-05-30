@@ -18,7 +18,7 @@ interface Message {
   text: string;
 }
 
-const WS_URL = "wss://5de7-68-65-164-210.ngrok-free.app"; // Or your real IP if testing on physical device
+const WS_URL = "wss://85bb-68-65-164-188.ngrok-free.app"; // Or your real IP if testing on physical device
 
 export default function WebSocketChat() {
   const [messages, setMessages] = useState<Message[]>([]);
