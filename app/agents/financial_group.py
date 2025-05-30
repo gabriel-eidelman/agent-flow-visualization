@@ -40,50 +40,51 @@ The summary should be concise and clear.
 """
 
 # Create the finance agent with LLM intelligence
-with llm_config:
-    finance_bot = ConversableAgent(
-        name="finance_bot",
-        system_message=finance_system_message,
+def run_group():
+    with llm_config:
+        finance_bot = ConversableAgent(
+            name="finance_bot",
+            system_message=finance_system_message,
+        )
+        summary_bot = ConversableAgent(
+            name="summary_bot",
+            system_message=summary_system_message,
+        )
+
+    # Create the human agent for oversight
+    human = ConversableAgent(
+        name="human",
+        human_input_mode="ALWAYS",  # Always ask for human input
     )
-    summary_bot = ConversableAgent(
-        name="summary_bot",
-        system_message=summary_system_message,
+
+    # Generate sample transactions - this creates different transactions each time you run
+    VENDORS = ["Staples", "Acme Corp", "CyberSins Ltd", "Initech", "Globex", "Unicorn LLC"]
+    MEMOS = ["Quarterly supplies", "Confidential", "NDA services", "Routine payment", "Urgent request", "Reimbursement"]
+
+    def generate_transaction():
+        amount = random.choice([500, 1500, 9999, 12000, 23000, 4000])
+        vendor = random.choice(VENDORS)
+        memo = random.choice(MEMOS)
+        return f"Transaction: ${amount} to {vendor}. Memo: {memo}."
+
+    # Generate 3 random transactions
+    transactions = [generate_transaction() for _ in range(3)]
+
+    # Format the initial message
+    initial_prompt = (
+        "Please process the following transactions one at a time:\n\n" +
+        "\n".join([f"{i+1}. {tx}" for i, tx in enumerate(transactions)])
     )
 
-# Create the human agent for oversight
-human = ConversableAgent(
-    name="human",
-    human_input_mode="ALWAYS",  # Always ask for human input
-)
+    # Create pattern and start group chat
+    pattern = AutoPattern(
+        initial_agent=finance_bot,
+        agents=[finance_bot, summary_bot],
+        user_agent=human,
+        group_manager_args = {"llm_config": llm_config},
+    )
 
-# Generate sample transactions - this creates different transactions each time you run
-VENDORS = ["Staples", "Acme Corp", "CyberSins Ltd", "Initech", "Globex", "Unicorn LLC"]
-MEMOS = ["Quarterly supplies", "Confidential", "NDA services", "Routine payment", "Urgent request", "Reimbursement"]
-
-def generate_transaction():
-    amount = random.choice([500, 1500, 9999, 12000, 23000, 4000])
-    vendor = random.choice(VENDORS)
-    memo = random.choice(MEMOS)
-    return f"Transaction: ${amount} to {vendor}. Memo: {memo}."
-
-# Generate 3 random transactions
-transactions = [generate_transaction() for _ in range(3)]
-
-# Format the initial message
-initial_prompt = (
-    "Please process the following transactions one at a time:\n\n" +
-    "\n".join([f"{i+1}. {tx}" for i, tx in enumerate(transactions)])
-)
-
-# Create pattern and start group chat
-pattern = AutoPattern(
-    initial_agent=finance_bot,
-    agents=[finance_bot, summary_bot],
-    user_agent=human,
-    group_manager_args = {"llm_config": llm_config},
-)
-
-result, _, _ = initiate_group_chat(
-    pattern=pattern,
-    messages=initial_prompt,
-)
+    result, _, _ = initiate_group_chat(
+        pattern=pattern,
+        messages=initial_prompt,
+    )
