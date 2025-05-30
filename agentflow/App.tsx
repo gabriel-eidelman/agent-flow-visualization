@@ -1,94 +1,44 @@
-import React, { useState } from 'react';
-import {
-  SafeAreaView,
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  StatusBar,
-} from 'react-native';
-import AgentChat from './AgentChat';
+// App.tsx
+import React from 'react';
+// import { createStaticNavigation } from '@react-navigation/native';
+import {NavigationContainer} from '@react-navigation/native'
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+// import type { StaticScreenProps } from '@react-navigation/native';
+
+import HomeScreen from './HomeScreen';
 import WebsocketChat from './WebsocketChat';
+import AgentChat from './AgentChat'
+
+export type RootStackParamList = {
+  Home: undefined;
+  AgentChat: undefined;
+  Websocket: undefined;
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
-  const [showResult, setShowResult] = useState(false);
-  const [showWebsocket, setShowWebSocket] = useState(false);
-
-  if (showResult) {
-    return <AgentChat />;
-  }
-  if (showWebsocket) {
-    return <WebsocketChat />;
-  }
-
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" />
-      <View style={styles.container}>
-        <Text style={styles.title}>🤖 Demo App</Text>
-        <Text style={styles.description}>
-          This is a demo app showing how to integrate AG2 with React Native and FastAPI.
-          Feel free to customize it however you like!
-        </Text>
-
-        <TouchableOpacity style={styles.button} onPress={() => setShowResult(true)}>
-          <Text style={styles.buttonText}>🚀 Launch Curriculum Planning Demo</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => setShowWebSocket(true)}>
-          <Text style={styles.buttonText}>🚀 Launch Websocket Chat Demo</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="AgentChat" component={AgentChat} />
+        <Stack.Screen name="Websocket" component={WebsocketChat} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#0F0F1A',
-  },
-  container: {
-    flex: 1,
-    padding: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#0F0F1A',
-  },
-  title: {
-    fontFamily: 'Courier New',
-    fontSize: 32,
-    color: '#00FFF7',
-    textShadowColor: '#00FFF7',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 8,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  description: {
-    fontFamily: 'Courier New',
-    fontSize: 16,
-    color: '#EDEDED',
-    lineHeight: 26,
-    textAlign: 'center',
-    marginBottom: 40,
-    paddingHorizontal: 8,
-  },
-  button: {
-    backgroundColor: '#1E1E2F',
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderWidth: 2,
-    borderColor: '#00FFF7',
-    shadowColor: '#00FFF7',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-  },
-  buttonText: {
-    fontFamily: 'Courier New',
-    fontSize: 16,
-    color: '#00FFF7',
-    textAlign: 'center',
-  },
-});
+// const RootStack = createNativeStackNavigator({
+//     initialRouteName: 'Home',
+//     screens: {
+//         Home: HomeScreen,
+//         Curriculum: AgentChat,
+//         Websocket: WebsocketChat
+//     },
+// });
+// const Navigation = createStaticNavigation(RootStack);
+
+// export default function App() {
+//   return <Navigation />;
+// }
