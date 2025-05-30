@@ -1,6 +1,8 @@
 from autogen import ConversableAgent, LLMConfig
 from autogen.agentchat import initiate_group_chat
 from autogen.agentchat.group.patterns import AutoPattern
+from autogen.agentchat.group import TerminateTarget
+
 
 import os
 import random
@@ -8,22 +10,26 @@ import random
 # Note: Make sure to set your API key in your environment first
 
 # Configure the LLM
-llm_config = LLMConfig(
-    api_type="openai",
-    model="gpt-4o-mini",
-    api_key=os.environ.get("OPENAI_API_KEY"),
-    temperature=0.2
-)
+# llm_config = LLMConfig(
+#     api_type="openai",
+#     model="gpt-4o-mini",
+#     api_key=os.environ.get("OPENAI_API_KEY"),
+#     temperature=0.2
+# )
 
 # Define the system message for our finance bot
-finance_system_message = """
-You are a financial compliance assistant. You will be given a set of transaction descriptions.
-For each transaction:
+"""
 - If it seems suspicious (e.g., amount > $10,000, vendor is unusual, memo is vague), ask the human agent for approval.
 - Otherwise, approve it automatically.
 Provide the full set of transactions to approve at one time.
 If the human gives a general approval, it applies to all transactions requiring approval.
-When all transactions are processed, summarize the results and say "You can type exit to finish".
+"""
+finance_system_message = """
+You are a financial compliance assistant. You will be given a set of transaction descriptions.
+For each transaction:
+- Approve it if it does not look suspicious
+- Deny it if it looks suspicious
+When all transactions are processed, summarize the results.
 """
 
 # Define the system message for the summary agent
@@ -36,11 +42,11 @@ Generate a markdown table with the following columns:
 - Amount
 - Status (Approved/Rejected)
 The summary should include the total number of transactions, the number of approved transactions, and the number of rejected transactions.
-The summary should be concise and clear.
+The summary should be concise and clear. Terminate the conversation when finished.
 """
 
 # Create the finance agent with LLM intelligence
-def run_group():
+def run_group(llm_config):
     with llm_config:
         finance_bot = ConversableAgent(
             name="finance_bot",
@@ -80,7 +86,7 @@ def run_group():
     pattern = AutoPattern(
         initial_agent=finance_bot,
         agents=[finance_bot, summary_bot],
-        user_agent=human,
+        # user_agent=human,
         group_manager_args = {"llm_config": llm_config},
     )
 

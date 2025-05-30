@@ -21,18 +21,16 @@ export default function HomeScreen(props: Props) {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" />
       <View style={styles.container}>
-        <Text style={styles.title}>🤖 Demo App</Text>
+        <Text style={styles.title}>Agent Flow</Text>
         <Text style={styles.description}>
-          This is a demo app showing how to integrate AG2 with React Native and FastAPI.
-          Feel free to customize it however you like!
+          Built with AG2, FastAPI, React Native.
         </Text>
-
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AgentChat')}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AgentFlow')}>
+          <Text style={styles.buttonText}>🤖 Visualize</Text>
+        </TouchableOpacity>
+        {/* <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AgentChat')}>
           <Text style={styles.buttonText}>🚀 Launch Curriculum Planning Demo</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Websocket')}>
-          <Text style={styles.buttonText}>🚀 Launch Websocket Chat Demo</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     </SafeAreaView>
   );
@@ -45,7 +43,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 24,
+    padding: 10,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#0F0F1A',
@@ -67,7 +65,7 @@ const styles = StyleSheet.create({
     lineHeight: 26,
     textAlign: 'center',
     marginBottom: 40,
-    paddingHorizontal: 8,
+    paddingHorizontal: 0,
   },
   button: {
     backgroundColor: '#1E1E2F',

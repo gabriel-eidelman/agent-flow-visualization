@@ -12,46 +12,69 @@ import {
 
 } from 'react-native';
 import { v4 as uuidv4 } from 'uuid';
+import {MessageType, Message} from './DataModels'
+import generateGraphData from './GenerateGraphData';
+import AgentFlowGraph from './AgentFlowGraph';
+import ViewToggle from './ViewToggle'
 
-interface Message {
-  id: string;
-  sender: string;
-  text: string;
+function get_message_type(type: string): MessageType {
+  if (type == "text") return MessageType.text
+  else if (type == "tool_response") return MessageType.tool
+  else if (type == 'termination') return MessageType.termination
+  return MessageType.unknown
 }
 
-const WS_URL = "wss://b905-2607-f6d0-ced-5b2-4014-664e-e97d-3305.ngrok-free.app"; // Or your real IP if testing on physical device
+const WS_URL = "wss://4ca2-2607-f6d0-ced-5b2-4014-664e-e97d-3305.ngrok-free.app"; // Or your real IP if testing on physical device
 
 export default function WebSocketChat() {
   const [messages, setMessages] = useState<Message[]>([]);
+  const graphData = generateGraphData(messages);
+
   const [input, setInput] = useState('');
+  const [displayType, setDisplayType] = useState<'chat' | 'flow'>('flow');
+
   const ws = useRef<WebSocket | null>(null);
 
   useEffect(() => {
     console.log("URL: ", WS_URL);
     ws.current = new WebSocket(WS_URL);
-
     ws.current.onmessage = (event) => {
-      const raw = event.data;
       try {
-        // const parsed = JSON.parse(raw);
-        // delete parsed.uuid;
-        const parsed = JSON.parse(raw);
-        const formatted = JSON.stringify(parsed, null, 2);
-        const content = parsed.content
-        const msgText = content?.content || "No Content";
-        const sender = content?.sender || "No Sender"
-        const recipient = content?.recipient || "No Recipient"
-        const type = parsed.type || "No Type"
+        // Quick pre-check to ignore non-JSON strings (optional but helps avoid noisy logs)
+        if (typeof event.data !== 'string' || !event.data.trim().startsWith('{')) {
+          // console.warn("Non-JSON message received, skipping:", event.data);
+          return;
+        }
 
-        const uuid = parsed.content?.uuid || uuidv4();
-        if (parsed.content?.content?.trim()) {
+        const parsed = JSON.parse(event.data);
+        const content = parsed.content;
+        const msgText = content?.content || "";
+        const type = parsed.type || "agent";
+        let sender = content?.sender || "sender";
+        const recipient = content?.recipient || "agent";
+
+        // Handle tool_response: extract the actual tool
+        if (type === "tool_response" && content.tool_responses?.length > 0) {
+          const toolResponse = content.tool_responses[0];
+          sender = toolResponse.role === "tool" ? "tool function" : sender;
+        }
+
+        const uuid = content?.uuid || uuidv4();
+
+        if (msgText.trim()) {
           setMessages((prev) => [
             ...prev,
-            { id: uuid, sender: sender, text: msgText },
+            {
+              id: uuid,
+              type: get_message_type(type),
+              sender,
+              recipient,
+              output: msgText,
+            },
           ]);
         }
       } catch (e) {
-        // fallback to raw string
+        console.error("Parse error:", e, "\nRaw event data:", event.data);
       }
     };
 
@@ -75,18 +98,24 @@ export default function WebSocketChat() {
   return (
   <SafeAreaView style={styles.safeArea}>
     <StatusBar barStyle="light-content" />
+    <View style={{padding: 20}}>
+      <ViewToggle displayType={displayType} setDisplayType={setDisplayType} />
+    </View>
+
     <View style={styles.container}>
-      <FlatList
-        style={styles.chatContainer}
-        data={messages}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.messageBubble}>
-            <Text>{item.sender}</Text>
-            <Text style={styles.messageText}>{item.text}</Text>
-          </View>
-        )}
-      />
+      {displayType=="flow" ? <AgentFlowGraph nodes={graphData.nodes} edges={graphData.edges}/> : 
+            <FlatList
+            style={styles.chatContainer}
+            data={messages}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View style={styles.messageBubble}>
+                  <Text style={styles.senderName}>{item.sender}</Text>
+                  <Text style={styles.messageText}>{item.output}</Text>
+              </View>
+            )}
+          />
+      }
 
       <View style={styles.inputRow}>
         <TextInput
@@ -174,4 +203,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
   },
+  senderName: {
+  color: '#00FFF7', // Neon turquoise
+  fontSize: 14,
+  fontWeight: 'bold',
+  textTransform: 'uppercase',
+  fontFamily: 'Courier New',
+  textShadowColor: '#00FFF7',
+  textShadowOffset: { width: 0, height: 0 },
+  textShadowRadius: 6,
+  marginBottom: 4,
+},
 });
