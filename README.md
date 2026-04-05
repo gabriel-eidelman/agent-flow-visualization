@@ -6,12 +6,6 @@ Watch your AI agents talk to each other — rendered live as an interactive node
 
 ---
 
-## Demo
-
-https://github.com/user-attachments/assets/41839b9b-7b99-4505-8483-cc81d413027e
-
----
-
 ## Overview
 
 Agent Flow Visualization bridges the gap between running multi-agent AI workflows and understanding what is actually happening inside them. As agents exchange messages, tool calls, and handoffs, the app renders each participant as a node and each interaction as a directed edge — giving you a live, scrollable graph of the entire conversation.
@@ -245,6 +239,12 @@ def on_connect(iostream: IOWebsockets) -> None:
     tech_support_group(llm_config, initial_msg)      # Tech support (active)
     # research_group(llm_config, initial_msg)        # Hierarchical research
 ```
+
+---
+
+## Demo
+
+https://github.com/user-attachments/assets/41839b9b-7b99-4505-8483-cc81d413027e
 
 ---
 
